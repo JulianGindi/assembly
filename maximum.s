@@ -1,3 +1,9 @@
+#VARIABLES: The registers have the following uses:
+#
+# %edi - Holds the index of the data item being examined
+# %ebx - Largest data item found
+# %eax - Current data item
+
 .section .data
 
 data_items:
@@ -8,4 +14,22 @@ data_items:
 .globl _start
 
 _start:
+movl $0, %edi
+movl data_items(,%edi,4), %eax
+movl %eax, %ebx
 
+start_loop:
+cmpl $0, %eax
+je loop_exit
+incl %edi
+movl data_items(,%edi,4), %eax
+cmpl %ebx, %eax
+jle start_loop
+movl %eax, %ebx
+jmp start_loop
+
+loop_exit:
+# %ebx is the status code for the exit system call
+# and it already has the maximum number
+movl $1, %eax #1 is the exit() syscall
+int $0x80
